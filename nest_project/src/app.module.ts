@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { PostModule } from './post/post.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Post } from './post/entities/post.entity';
+import { AuthModule } from './auth/auth.module';
+import { User } from './auth/entities/user.entity';
 
 @Module({
   imports: [
@@ -14,10 +16,11 @@ import { Post } from './post/entities/post.entity';
       username : 'postgres',
       password: 'Thek',
       database: 'nestjs-project-db',
-      entities: [Post], // array of entities that u want to register
+      entities: [Post, User], // array of entities that u want to register
       synchronize: true, // dev mode
     }),
-    PostModule],
+    PostModule,
+    AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
