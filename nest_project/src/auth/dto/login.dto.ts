@@ -10,7 +10,7 @@ export class LoginDto {
   @IsEmail({}, { message: 'Please provide a valid email!' })
   email: string;
 
-  @IsNotEmpty({ message: 'Name is required ! Please provide name' })
-  @MinLength(6, { message: 'Name must be at least 6 characters long' })
+  @IsNotEmpty({ message: 'Password is required ! Please provide name' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 }

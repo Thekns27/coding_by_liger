@@ -10,10 +10,10 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true, // strips properties that don't have docorators
       forbidNonWhitelisted: true,
-      transform : true, // autocally transforms payloads to be objects typed according to their dto classes
+      transform: true, // autocally transforms payloads to be objects typed according to their dto classes
       disableErrorMessages: false,
-    })
-  )
+    }),
+  );
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
