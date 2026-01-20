@@ -10,7 +10,6 @@ import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
-import { use } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +18,6 @@ export class AuthService {
     private userRepository: Repository<User>,
     private jwtService: JwtService,
   ) {}
-
 
   async register(registerDto: RegisterDto) {
     const existingUser = await this.userRepository.findOne({
@@ -33,7 +31,7 @@ export class AuthService {
     }
     const hashedPassword = await this.hashPassword(registerDto.password);
 
-    const newlyCreateUser = await this.userRepository.create({
+    const newlyCreateUser = this.userRepository.create({
       email: registerDto.email,
       name: registerDto.name,
       password: hashedPassword,
@@ -69,8 +67,8 @@ export class AuthService {
     const savedUser = await this.userRepository.save(newlyCreateUser);
     const { password, ...result } = savedUser;
     return {
-      name: registerDto.name,
-      message: 'createAdmin   successful! please login to containue',
+      user: result,
+      message: 'create admin   successful! please login to containue',
     };
   }
 
@@ -116,14 +114,14 @@ export class AuthService {
     }
   }
 
-  async getUserById (userId: number) {
+  async getUserById(userId: number) {
     const user = await this.userRepository.findOne({
-      where : {id : userId}
-    })
+      where: { id: userId },
+    });
     if (!user) {
-      throw new UnauthorizedException('User not found')
+      throw new UnauthorizedException('User not found');
     }
-    const {password,...result} = user;
+    const { password, ...result } = user;
     return result;
   }
 
