@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Post} from './entities/post.entity';
 import { Repository } from 'typeorm';
@@ -6,14 +6,23 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { relative } from 'path';
 import { User, UserRole } from 'src/auth/entities/user.entity';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { FindPostsQueryDto } from './dto/find-posts-query.dto';
 
 @Injectable()
 export class PostService {
+    private postListCachekeys: Set<string> = new Set();
 
     constructor(
     @InjectRepository(Post)
     private postsRepository: Repository<Post>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  private generatePostsListCacheKey(query:FindPostsQueryDto):string {
+    const {page = 1,limit = 10,title } = query;
+    return `posts_list_page${page}_limit${limit}_title${title || 'all'}`
+  }
 
  async findAll():Promise<Post[]>{
     return this.postsRepository.find({
