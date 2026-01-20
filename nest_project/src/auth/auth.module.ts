@@ -5,8 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guard/roles.guard';
+import { JwtStrategy } from './strategies/jwt.strategy';
 @Module({
   imports: [
     // this will make the post repository avaliable for injection
@@ -17,10 +17,13 @@ import { RolesGuard } from './guard/roles.guard';
     PassportModule,
 
     // configure JWT
-    JwtModule.register({}),
+    JwtModule.register({
+      secret: 'jwt_secret',
+      signOptions: { expiresIn: '60m' },
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, RolesGuard], // jwt strategy , roles guard
-  exports: [AuthService], // roles guard -> todo
+  exports: [AuthService, RolesGuard], // roles guard -> todo
 })
 export class AuthModule {}

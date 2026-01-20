@@ -6,6 +6,7 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Roles } from './decorators/roles.decorators';
 import { UserRole } from './entities/user.entity';
+import { RolesGuard } from './guard/roles.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,11 +30,10 @@ export class AuthController {
   // protected route
   // Current user route
   // Current user route
-
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@CurrentUser() user: any) {
-    return user;
+    return user.role;
   }
 
   // protected route
@@ -42,7 +42,7 @@ export class AuthController {
 
   @Post('create-admin')
   @Roles(UserRole.ADMIN)
- // @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   cteateAdmin(@Body() registerDto: RegisterDto) {
     return this.authService.createAdmin(registerDto);
   }
