@@ -13,7 +13,7 @@ import { User } from './users/entities/users.entity';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: 'password',
+      password: 'Thek',
       database: 'authentication_api',
       entities: [User],
       synchronize: true,
