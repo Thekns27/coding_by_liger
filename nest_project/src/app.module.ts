@@ -8,9 +8,15 @@ import { AuthModule } from './auth/auth.module';
 import { User } from './auth/entities/user.entity';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { CacheModule } from '@nestjs/cache-manager';
+import { ConfigModule } from '@nestjs/config';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
+
+    ConfigModule.forRoot({
+      isGlobal: true
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
@@ -34,6 +40,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     }),
     PostModule,
     AuthModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
