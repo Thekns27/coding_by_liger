@@ -4,10 +4,10 @@ import { Post} from './entities/post.entity';
 import { Repository } from 'typeorm';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
-import { relative } from 'path';
 import { User, UserRole } from 'src/auth/entities/user.entity';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { FindPostsQueryDto } from './dto/find-posts-query.dto';
+import { PaginatedResponse } from 'src/common/interfaces/paginated-response.interface';
 
 @Injectable()
 export class PostService {
@@ -24,10 +24,52 @@ export class PostService {
     return `posts_list_page${page}_limit${limit}_title${title || 'all'}`
   }
 
- async findAll():Promise<Post[]>{
-    return this.postsRepository.find({
-        relations: ['authorName']
-    });
+//  async findAll():Promise<Post[]>{
+//     return this.postsRepository.find({
+//         relations: ['authorName']
+//     });
+//   }
+
+  async findAll (query: FindPostsQueryDto):Promise<PaginatedResponse<Post>> {
+    const cacheKey = this.generatePostsListCacheKey(query);
+
+    this.postListCachekeys.add(cacheKey)
+
+    const getCachedDAta = await this.cacheManager.get<PaginatedResponse<Post>>(cacheKey);
+
+    if (getCachedDAta) {
+        console.log(`Cache Hit -----> Returning posts list from Cache ${cacheKey}`);
+        return getCachedDAta
+    }
+        console.log(`Cache Miss -----> Returning posts list from database`);
+
+        const {page = 1, limit = 10 ,title} =query;
+
+        const skip = (page -1) * limit
+
+        const queryBuilder = this.postsRepository.createQueryBuilder('post')
+        .leftJoinAndSelect('post.authorName','authorName').orderBy('post.createdAt','DESC')
+        .skip(skip).take(limit)
+        if (title) {
+            queryBuilder.andWhere('post.title ILIKE:title',{title:`%${title}%`})
+        }
+        const [items,totalItems] = await queryBuilder.getManyAndCount();
+
+        const totalPages = Math.ceil(totalItems/limit)
+
+        const responseResult = {
+            items ,
+            meta : {
+                currentPage : page,
+                tiemsPerPage : limit,
+                totalItems,
+                totalPages,
+                hasPreviouspage : page >1,
+                hasNextPage: page < totalPages
+            }
+        }
+        await this.cacheManager.set(cacheKey,responseResult,30000)
+        return responseResult;
   }
 
  async findOne(id: number):Promise<Post>{
